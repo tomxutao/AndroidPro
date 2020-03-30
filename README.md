@@ -8,5 +8,8 @@ MediaSession:
 兼容小米，魅族，华为的系统mediasession处理事件
 如遇编译不过，可自行修改部分代码。
 
-QuickDrawable
+QuickDrawable:
 使用代码代替xml实现Drawable,减少文件数量
+
+NestedScrollFlingView:
+利用反射实现了nestedscrollview和recyclerview之间可以嵌套fling
