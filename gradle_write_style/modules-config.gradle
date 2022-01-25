@@ -1,0 +1,66 @@
+def TAG = "QAdModulesConfig"
+
+ext.QAdModulesConfig = [
+        getModulesConfigFile: { configPath ->
+            def tag = "${TAG} getModuleConfigProperties"
+            println("${tag} path = ${configPath}")
+            File configFile = new File(configPath)
+            return configFile
+        },
+
+        getModulesConfigProperties: { configPath ->
+            File configFile = QAdModulesConfig.getModulesConfigFile(configPath)
+            Properties properties = new Properties()
+            properties.load(new FileInputStream(configFile))
+            properties.load(configFile.newDataInputStream())
+            return properties
+        },
+]
+
+ext.PbDefaultServiceConfig = [
+        TAG : "PbDefaultServiceConfig",
+        defaultEnable : true,
+        configFilePath : "",
+        setQAdProjectPath: { qAdProjectPath ->
+            //本地编译时，主端可能会设置本地编译工程路径进来，将path存到file
+            def tag = "${PbDefaultServiceConfig.TAG} setQAdProjectPath"
+            PbDefaultServiceConfig.configFilePath = qAdProjectPath + "/QAdModules/moduleconfig.properties"
+            PbDefaultServiceConfig.setConfigFileProperty("modulesConfigFilePath", PbDefaultServiceConfig.configFilePath)
+            println("${tag} PbDefaultServiceConfig.configFilePath = " + PbDefaultServiceConfig.configFilePath)
+        },
+
+        setConfigFileProperty: { key, value ->
+            Properties properties = QAdModulesConfig.getModulesConfigProperties(PbDefaultServiceConfig.configFilePath)
+            properties.setProperty(key, value)
+            File configFile = QAdModulesConfig.getModulesConfigFile(PbDefaultServiceConfig.configFilePath)
+            properties.store(configFile.newDataOutputStream(), 'update success')
+        },
+
+        getEnable: {
+            def tag = "${PbDefaultServiceConfig.TAG} getEnable"
+            if (PbDefaultServiceConfig.configFilePath == "") {
+                println("${tag} return defaultEnable = " + PbDefaultServiceConfig.defaultEnable)
+                return PbDefaultServiceConfig.defaultEnable
+            }
+            Properties properties = QAdModulesConfig.getModulesConfigProperties(PbDefaultServiceConfig.configFilePath)
+            boolean value = properties.get("enablePbDefaultService") == "1"
+            println("${tag} value = " + value)
+            return value
+        },
+
+        setEnable: { value ->
+            def tag = "${PbDefaultServiceConfig.TAG} setEnable"
+            Properties properties = QAdModulesConfig.getModulesConfigProperties(PbDefaultServiceConfig.configFilePath)
+            if (value == true) {
+                println("${tag} setProperty 1")
+                properties.setProperty("enablePbDefaultService", "1")
+            } else if (value == false) {
+                println("${tag} setProperty 0")
+                properties.setProperty("enablePbDefaultService", "0")
+            }
+            File configFile = QAdModulesConfig.getModulesConfigFile(PbDefaultServiceConfig.configFilePath)
+            properties.store(configFile.newDataOutputStream(), 'update success')
+        },
+
+]
+
